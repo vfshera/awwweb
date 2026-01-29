@@ -1,0 +1,9 @@
+pre-commit:
+  commands:
+    format:
+      glob: "**/*.{ts,tsx}"
+      run: bunx prettier --write --ignore-unknown {staged_files}
+
+    lint:
+      glob: "**/*.{ts,tsx}"
+      run: bunx eslint --fix {staged_files}

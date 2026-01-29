@@ -5,7 +5,7 @@ const getPasswordSchema = (name = "password") => {
 };
 
 export const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: getPasswordSchema(),
 });
 
@@ -14,7 +14,7 @@ export type LoginSchemaType = z.infer<typeof loginSchema>;
 export const signupSchema = z
   .object({
     name: z.string().min(3, "name must be at least 3 characters long"),
-    email: z.string().email(),
+    email: z.email(),
     password: getPasswordSchema(),
     confirmPassword: getPasswordSchema("confirmPassword"),
   })

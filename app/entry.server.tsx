@@ -1,4 +1,8 @@
-import type { AppLoadContext, EntryContext } from "react-router";
+import type {
+  AppLoadContext,
+  EntryContext,
+  RouterContextProvider,
+} from "react-router";
 import { ServerRouter } from "react-router";
 import { createReadableStreamFromReadable } from "@react-router/node";
 import { isbot } from "isbot";
@@ -6,15 +10,25 @@ import { PassThrough } from "node:stream";
 import type { RenderToPipeableStreamOptions } from "react-dom/server";
 import { renderToPipeableStream } from "react-dom/server";
 
-const ABORT_DELAY = 5_000;
+export const streamTimeout = 5_000;
 
 export default function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
   routerContext: EntryContext,
-  loadContext: AppLoadContext,
+  loadContext: RouterContextProvider,
+  // If you have middleware enabled:
+  // loadContext: RouterContextProvider
 ) {
+  // https://httpwg.org/specs/rfc9110.html#HEAD
+  if (request.method.toUpperCase() === "HEAD") {
+    return new Response(null, {
+      status: responseStatusCode,
+      headers: responseHeaders,
+    });
+  }
+
   return new Promise((resolve, reject) => {
     let shellRendered = false;
 
@@ -23,18 +37,36 @@ export default function handleRequest(
     // Ensure requests from bots and SPA Mode renders wait for all content to load before responding
     // https://react.dev/reference/react-dom/server/renderToPipeableStream#waiting-for-all-content-to-load-for-crawlers-and-static-generation
     const readyOption: keyof RenderToPipeableStreamOptions =
-      (userAgent && isbot(userAgent)) || routerContext.isSpaMode ? "onAllReady" : "onShellReady";
+      (userAgent && isbot(userAgent)) || routerContext.isSpaMode
+        ? "onAllReady"
+        : "onShellReady";
+
+    // Abort the rendering stream after the `streamTimeout` so it has time to
+    // flush down the rejected boundaries
+    let timeoutId: ReturnType<typeof setTimeout> | undefined = setTimeout(
+      () => abort(),
+      streamTimeout + 1000,
+    );
 
     const { pipe, abort } = renderToPipeableStream(
-      <ServerRouter context={routerContext} url={request.url} abortDelay={ABORT_DELAY} />,
+      <ServerRouter context={routerContext} url={request.url} />,
       {
         [readyOption]() {
           shellRendered = true;
-          const body = new PassThrough();
+          const body = new PassThrough({
+            final(callback) {
+              // Clear the timeout to prevent retaining the closure and memory leak
+              clearTimeout(timeoutId);
+              timeoutId = undefined;
+              callback();
+            },
+          });
 
           const stream = createReadableStreamFromReadable(body);
 
           responseHeaders.set("Content-Type", "text/html");
+
+          pipe(body);
 
           resolve(
             new Response(stream, {
@@ -42,8 +74,6 @@ export default function handleRequest(
               status: responseStatusCode,
             }),
           );
-
-          pipe(body);
         },
         onShellError(error: unknown) {
           reject(error);
@@ -59,7 +89,5 @@ export default function handleRequest(
         },
       },
     );
-
-    setTimeout(abort, ABORT_DELAY);
   });
 }

@@ -1,11 +1,11 @@
 import { Form, Link, useNavigate, useSearchParams } from "react-router";
-import { authClient } from "~/lib/auth.client";
+import { authClient } from "~/utils/auth.client";
 import { GithubIcon } from "~/components/icons";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { AUTHENTICATED_REDIRECT, REDIRECT_PATH_PARAM } from "~/constants";
 import { type LoginSchemaType, loginSchema } from "~/schemas/auth.schema";
 import { generateLinkWithRedirectTo } from "~/utils";
-import { AUTHENTICATED_REDIRECT, REDIRECT_PATH_PARAM } from "~/utils/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -62,10 +62,15 @@ export default function SignIn() {
       <p className="mb-16 text-lg font-normal text-gray-600">
         Enter your email and password to sign in
       </p>
-      <Form onSubmit={handleSubmit(signIn)} className="mx-auto max-w-[24rem] text-left">
+      <Form
+        onSubmit={handleSubmit(signIn)}
+        className="mx-auto max-w-[24rem] text-left"
+      >
         <div className="mb-6">
           <label htmlFor="email">
-            <span className="mb-2 block font-medium text-gray-900">Your Email</span>
+            <span className="mb-2 block font-medium text-gray-900">
+              Your Email
+            </span>
           </label>
           <Input
             type="email"
@@ -73,11 +78,15 @@ export default function SignIn() {
             className="py-3 text-base"
             {...register("email")}
           />
-          {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="text-red-500">{errors.email.message}</p>
+          )}
         </div>
         <div className="mb-6">
           <label htmlFor="password">
-            <span className="mb-2 block font-medium text-gray-900">Password</span>
+            <span className="mb-2 block font-medium text-gray-900">
+              Password
+            </span>
           </label>
           <Input
             placeholder="********"
@@ -85,9 +94,14 @@ export default function SignIn() {
             type="password"
             {...register("password")}
           />
-          {errors.password && <p className="text-red-500">{errors.password.message}</p>}
+          {errors.password && (
+            <p className="text-red-500">{errors.password.message}</p>
+          )}
         </div>
-        <Button disabled={isSubmitting} className="mt-6 w-full bg-black py-5 uppercase">
+        <Button
+          disabled={isSubmitting}
+          className="mt-6 w-full bg-black py-5 uppercase"
+        >
           sign in
         </Button>
         <div className="mt-4 flex justify-end">

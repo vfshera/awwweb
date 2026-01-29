@@ -1,10 +1,10 @@
 import { Form, Link, useNavigate, useSearchParams } from "react-router";
-import { authClient } from "~/lib/auth.client";
+import { authClient } from "~/utils/auth.client";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { AUTHENTICATED_REDIRECT, REDIRECT_PATH_PARAM } from "~/constants";
 import { type SignupSchemaType, signupSchema } from "~/schemas/auth.schema";
 import { generateLinkWithRedirectTo } from "~/utils";
-import { AUTHENTICATED_REDIRECT, REDIRECT_PATH_PARAM } from "~/utils/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -44,10 +44,15 @@ export default function SignUp() {
     <div>
       <h1 className="mb-2 text-3xl font-semibold text-gray-900">Sign Up</h1>
 
-      <Form onSubmit={handleSubmit(signUp)} className="mx-auto max-w-[24rem] text-left">
+      <Form
+        onSubmit={handleSubmit(signUp)}
+        className="mx-auto max-w-[24rem] text-left"
+      >
         <div className="mb-6">
           <label htmlFor="name">
-            <span className="mb-2 block font-medium text-gray-900">Your Name</span>
+            <span className="mb-2 block font-medium text-gray-900">
+              Your Name
+            </span>
           </label>
           <Input
             type="text"
@@ -59,7 +64,9 @@ export default function SignUp() {
         </div>
         <div className="mb-6">
           <label htmlFor="email">
-            <span className="mb-2 block font-medium text-gray-900">Your Email</span>
+            <span className="mb-2 block font-medium text-gray-900">
+              Your Email
+            </span>
           </label>
           <Input
             type="email"
@@ -67,11 +74,15 @@ export default function SignUp() {
             className="py-3 text-base"
             {...register("email")}
           />
-          {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="text-red-500">{errors.email.message}</p>
+          )}
         </div>
         <div className="mb-6">
           <label htmlFor="password">
-            <span className="mb-2 block font-medium text-gray-900">Password</span>
+            <span className="mb-2 block font-medium text-gray-900">
+              Password
+            </span>
           </label>
           <Input
             placeholder="********"
@@ -79,11 +90,15 @@ export default function SignUp() {
             type="password"
             {...register("password")}
           />
-          {errors.password && <p className="text-red-500">{errors.password.message}</p>}
+          {errors.password && (
+            <p className="text-red-500">{errors.password.message}</p>
+          )}
         </div>
         <div className="mb-6">
           <label htmlFor="password">
-            <span className="mb-2 block font-medium text-gray-900">Confirm Password</span>
+            <span className="mb-2 block font-medium text-gray-900">
+              Confirm Password
+            </span>
           </label>
           <Input
             placeholder="********"
@@ -95,7 +110,10 @@ export default function SignUp() {
             <p className="text-red-500">{errors.confirmPassword.message}</p>
           )}
         </div>
-        <Button disabled={isSubmitting} className="mt-6 w-full bg-black py-5 uppercase">
+        <Button
+          disabled={isSubmitting}
+          className="mt-6 w-full bg-black py-5 uppercase"
+        >
           sign up
         </Button>
 

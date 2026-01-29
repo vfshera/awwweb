@@ -1,7 +1,7 @@
 import type { Route } from "./+types/_layout";
 import { Link, Outlet, useNavigate } from "react-router";
 import { requireAuth } from "~/.server/auth/utils";
-import { authClient } from "~/lib/auth.client";
+import { authClient } from "~/utils/auth.client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,8 +20,16 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "~/components/ui/sidebar";
-import { SIGNOUT_REDIRECT } from "~/utils/constants";
-import { Calendar, ChevronUp, Home, Inbox, Search, Settings, User2 } from "lucide-react";
+import { SIGNOUT_REDIRECT } from "~/constants";
+import {
+  Calendar,
+  ChevronUp,
+  Home,
+  Inbox,
+  Search,
+  Settings,
+  User2,
+} from "lucide-react";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { user } = await requireAuth(request);
@@ -58,7 +66,9 @@ const items = [
   },
 ];
 
-export default function DashboardLayout({ loaderData: { user } }: Route.ComponentProps) {
+export default function DashboardLayout({
+  loaderData: { user },
+}: Route.ComponentProps) {
   const navigate = useNavigate();
 
   async function handleLogout() {
@@ -110,8 +120,13 @@ export default function DashboardLayout({ loaderData: { user } }: Route.Componen
                       <ChevronUp className="ml-auto" />
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="top" className="w-(--radix-popper-anchor-width)">
-                    <DropdownMenuItem onClick={() => navigate("/dashboard/account")}>
+                  <DropdownMenuContent
+                    side="top"
+                    className="w-(--radix-popper-anchor-width)"
+                  >
+                    <DropdownMenuItem
+                      onClick={() => navigate("/dashboard/account")}
+                    >
                       <span>Account</span>
                     </DropdownMenuItem>
 

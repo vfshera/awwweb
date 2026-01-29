@@ -1,6 +1,6 @@
 import type { Route } from "./+types/_layout";
 import { Outlet, redirect } from "react-router";
-import { AUTHENTICATED_REDIRECT } from "~/utils/constants";
+import { AUTHENTICATED_REDIRECT } from "~/constants";
 
 export async function loader({ context }: Route.LoaderArgs) {
   if (context.isAuthenticated) {

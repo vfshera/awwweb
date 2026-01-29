@@ -1,6 +1,6 @@
 import { RouterContextProvider, createContext } from "react-router";
 import { db } from "~/.server/db";
-import { clientEnv, env } from "~/.server/env";
+import { clientEnv, env } from "~/env.server";
 import type { BaseContext, GetLoadContextFunction } from "./types";
 
 export const appContext = createContext<BaseContext>();

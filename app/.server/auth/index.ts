@@ -1,5 +1,5 @@
+import { env } from "~/env.server";
 import { db } from "../db";
-import env from "../env";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
@@ -21,3 +21,7 @@ export const auth = betterAuth({
     provider: "sqlite",
   }),
 });
+
+export type AuthType = typeof auth;
+
+export type AuthSession = typeof auth.$Infer.Session;

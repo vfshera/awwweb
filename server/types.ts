@@ -1,11 +1,11 @@
-import type { Session } from "~/.server/auth";
+import type { AuthSession } from "~/.server/auth";
 import type { DB } from "~/.server/db";
-import type { Env, PublicEnv } from "~/.server/env";
+import type { Env, PublicEnv } from "~/env.server";
 import type { HonoServerOptions } from "react-router-hono-server/node";
 
 export type SessionVariables = {
-  user: Session["user"] | null;
-  session: Session["session"] | null;
+  user: AuthSession["user"] | null;
+  session: AuthSession["session"] | null;
 };
 
 export type AppBindings = {

@@ -1,4 +1,4 @@
-import env from "~/.server/env";
+import { env } from "~/env.server";
 import { db } from ".";
 import config from "$/drizzle.config";
 import "dotenv/config";

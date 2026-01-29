@@ -1,14 +1,14 @@
-/* eslint-disable no-undef */
-
 /**
- * @type {import('prettier').Config}
+ * @see https://prettier.io/docs/en/configuration.html
+ * @type {import("prettier").Config}
  */
-const config = {
+export default {
   plugins: [
     "@trivago/prettier-plugin-sort-imports",
     "prettier-plugin-tailwindcss",
   ],
-  printWidth: 100,
+  tailwindFunctions: ["clsx", "cn"],
+  importOrderSortSpecifiers: true,
   importOrder: [
     "^.*\\.\\/\\+types\\/.*$", // Route module types
     "^react$", // React imports
@@ -21,7 +21,4 @@ const config = {
     "^import type", // Types
     "^.+$", // Other imports
   ],
-  importOrderSortSpecifiers: true,
 };
-
-module.exports = config;

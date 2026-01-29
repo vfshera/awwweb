@@ -36,6 +36,23 @@ export function loadEnv<T extends z.ZodTypeAny>(schema: T): z.infer<T> {
   return parsed.data;
 }
 
+const postgresUrlSchema = z
+  .string()
+  .min(1, "Database URL is required")
+  .refine(
+    (url) => url.startsWith("postgres://") || url.startsWith("postgresql://"),
+    "Database URL must start with postgres:// or postgresql://",
+  )
+  .refine((url) => {
+    try {
+      new URL(url);
+
+      return true;
+    } catch {
+      return false;
+    }
+  }, "Invalid URL format");
+
 const envSchema = z
   .object({
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
@@ -44,6 +61,7 @@ const envSchema = z
       .default("false")
       .transform((val) => val === "true"),
     PUBLIC_APP_URL: z.url(),
+    DATABASE_URL: postgresUrlSchema,
     BETTER_AUTH_SECRET: z.string().min(1),
     BETTER_AUTH_URL: z.url(),
     GITHUB_CLIENT_ID: z.string().min(1),

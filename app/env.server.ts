@@ -56,10 +56,7 @@ const postgresUrlSchema = z
 const envSchema = z
   .object({
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-    DB_MIGRATING: z
-      .string()
-      .default("false")
-      .transform((val) => val === "true"),
+
     PUBLIC_APP_URL: z.url(),
     DATABASE_URL: postgresUrlSchema,
     BETTER_AUTH_SECRET: z.string().min(1),

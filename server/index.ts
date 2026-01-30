@@ -4,10 +4,13 @@ import { db } from "~/.server/db";
 import { clientEnv, env } from "~/env.server";
 import { appContext } from "./context";
 import type { AppBindings } from "./types";
+import { requestId } from "hono/request-id";
 import { createHonoServer } from "react-router-hono-server/node";
 
 export default await createHonoServer<AppBindings>({
   beforeAll(server) {
+    server.use(requestId());
+
     server.use(async (ctx, next) => {
       const session = await auth.api.getSession({
         headers: ctx.req.raw.headers,
@@ -31,6 +34,7 @@ export default await createHonoServer<AppBindings>({
 
     context.set(appContext, {
       appVersion: env.PROD ? build.assets.version : "dev",
+      requestId: ctx.get("requestId"),
       db,
       env,
       clientEnv,

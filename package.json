@@ -1,9 +1,9 @@
 {
-  "name": "wwweb",
-  "description": "WWWeb - Full Stack Web App starter kit",
+  "name": "awwweb",
+  "description": "A Web Project Starter",
   "author": {
     "name": "Franklin Shera",
-    "url": "https://github.com/vfshera/wwweb"
+    "url": "https://github.com/vfshera/awwweb"
   },
   "license": "MIT",
   "private": true,

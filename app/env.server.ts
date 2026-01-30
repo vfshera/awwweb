@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 import { expand } from "dotenv-expand";
 import pc from "picocolors";
+import type { Simplify } from "type-fest";
 import * as z from "zod";
 
 expand(config());
@@ -89,9 +90,9 @@ type PublicKeys<T> = {
   [K in keyof T as K extends `PUBLIC_${infer Rest}` ? Rest : never]: T[K];
 };
 
-export type PublicEnv = PublicKeys<Env>;
+export type PublicEnv = Simplify<PublicKeys<Env>>;
 
-function getPublicEnv(): PublicEnv {
+function getPublicEnv() {
   const publicEnv: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(env)) {
@@ -103,4 +104,4 @@ function getPublicEnv(): PublicEnv {
   return publicEnv as PublicEnv;
 }
 
-export const clientEnv: PublicEnv = getPublicEnv();
+export const clientEnv = getPublicEnv();

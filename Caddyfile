@@ -1,4 +1,4 @@
-wwweb.localhost {
+awwweb.localhost {
 	reverse_proxy localhost:5173
 	log {
 		output stderr

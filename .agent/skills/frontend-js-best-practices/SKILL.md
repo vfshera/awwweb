@@ -323,3 +323,39 @@ Use an explicit `Result` type for success/failure.
 let result = success(data);
 if (isFailure(result)) return handleError(result.error);
 ```
+
+### async-parallel (CRITICAL) — @rules/async-parallel.md
+
+Use `Promise.all()` for independent operations.
+
+```typescript
+// Correct: parallel execution
+const [user, posts] = await Promise.all([fetchUser(), fetchPosts()]);
+```
+
+### async-dependencies (CRITICAL) — @rules/async-dependencies.md
+
+Chain dependent operations, parallelize independent ones.
+
+```typescript
+const userPromise = fetchUser();
+const profilePromise = userPromise.then((user) => fetchProfile(user.id));
+const [user, config, profile] = await Promise.all([
+  userPromise,
+  fetchConfig(),
+  profilePromise,
+]);
+```
+
+### async-defer-await (HIGH) — @rules/async-defer-await.md
+
+Move `await` operations into the branches where they're actually used.
+
+```typescript
+// Correct: only waits when needed
+async function handle(skip: boolean) {
+  if (skip) return { skipped: true };
+  let data = await fetchData();
+  return process(data);
+}
+```

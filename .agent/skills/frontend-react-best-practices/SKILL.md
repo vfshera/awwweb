@@ -378,6 +378,23 @@ function Dropdown({ isOpen }: Props) {
 }
 ```
 
+#### rendering-suspense-boundaries - @rules/rendering-suspense-boundaries.md
+
+Use Suspense to show UI immediately while data loads.
+
+```tsx
+// Good: layout shows immediately, content streams in
+function Page() {
+  return (
+    <Layout>
+      <Suspense fallback={<Skeleton />}>
+        <Content />
+      </Suspense>
+    </Layout>
+  );
+}
+```
+
 ### Client Patterns (MEDIUM)
 
 #### client-passive-event-listeners - @rules/client-passive-event-listeners.md

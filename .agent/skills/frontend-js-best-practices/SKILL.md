@@ -335,16 +335,22 @@ const [user, posts] = await Promise.all([fetchUser(), fetchPosts()]);
 
 ### async-dependencies (CRITICAL) — @rules/async-dependencies.md
 
-Chain dependent operations, parallelize independent ones.
+For operations with partial dependencies, use `better-all` to maximize parallelism.
 
 ```typescript
-const userPromise = fetchUser();
-const profilePromise = userPromise.then((user) => fetchProfile(user.id));
-const [user, config, profile] = await Promise.all([
-  userPromise,
-  fetchConfig(),
-  profilePromise,
-]);
+import { all } from "better-all";
+
+const { user, config, profile } = await all({
+  async user() {
+    return fetchUser();
+  },
+  async config() {
+    return fetchConfig();
+  },
+  async profile() {
+    return fetchProfile((await this.$.user).id);
+  },
+});
 ```
 
 ### async-defer-await (HIGH) — @rules/async-defer-await.md

@@ -1,5 +1,5 @@
 ---
-name: frontend-internationalization-best-practices
+name: internationalization-best-practices
 description: Internationalization best practices for React Router framework mode using remix-i18next. Use when setting up locales, middleware, resource routes, or language switching.
 ---
 

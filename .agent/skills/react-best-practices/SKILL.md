@@ -1,5 +1,5 @@
 ---
-name: frontend-react-best-practices
+name: react-best-practices
 description: React performance optimization guidelines. Use when writing, reviewing, or refactoring React components to ensure optimal rendering and bundle patterns. Triggers on tasks involving React components, hooks, memoization, or bundle optimization.
 ---
 

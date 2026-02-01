@@ -1,5 +1,5 @@
 ---
-name: frontend-js-best-practices
+name: js-best-practices
 description: JavaScript performance optimization guidelines. Use when writing, reviewing, or refactoring JavaScript/TypeScript code to ensure optimal performance patterns. Triggers on tasks involving loops, data structures, DOM manipulation, or general JS optimization.
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: frontend-accessibility-best-practices
+name: accessibility-best-practices
 description: Accessibility (a11y) best practices for React components. Use when creating UI components, forms, interactive elements, or reviewing code for accessibility compliance.
 ---
 
@@ -101,13 +101,14 @@ import { Button } from "react-aria-components";
 Show visible focus indicators and trap focus in modals.
 
 ```tsx
+// react-aria Modal handles focus trapping automatically
+import { Dialog, Modal } from "react-aria-components";
+
 // Always use focus-visible for focus styles
 <button className="focus-visible:ring-2 focus-visible:ring-teal-600">
   Click me
 </button>;
 
-// react-aria Modal handles focus trapping automatically
-import { Modal, Dialog } from "react-aria-components";
 <Modal isOpen={isOpen}>
   <Dialog>{/* Focus automatically trapped here */}</Dialog>
 </Modal>;

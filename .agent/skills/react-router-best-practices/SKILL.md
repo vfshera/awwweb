@@ -1,5 +1,5 @@
 ---
-name: frontend-react-router-best-practices
+name: react-router-best-practices
 description: React Router performance and architecture patterns. Use when writing loaders, actions, forms, routes, or working with React Router data fetching. Triggers on tasks involving React Router routes, data loading, form handling, or route organization.
 ---
 

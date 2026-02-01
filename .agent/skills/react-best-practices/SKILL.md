@@ -5,17 +5,18 @@ description: React performance optimization guidelines. Use when writing, review
 
 # React Best Practices
 
-Performance optimization and composition patterns for React components. Contains 40 rules across 7 categories focused on reducing re-renders, optimizing bundles, component composition, and avoiding common React pitfalls.
+Performance optimization and composition patterns for React components. Contains 47 rules across 8 categories focused on reducing re-renders, optimizing bundles, component composition, accessibility, and avoiding common React pitfalls.
 
 ## When to Apply
 
 Reference these guidelines when:
 
 - Writing new React components
-- Reviewing code for performance issues
+- Reviewing code for performance and accessibility issues
 - Refactoring existing React code
 - Optimizing bundle size
 - Working with hooks and state
+- Ensuring accessibility compliance
 
 ## Rules Summary
 
@@ -703,4 +704,132 @@ function ComposerInput({
 
 // Good: use() instead of useContext()
 const value = use(MyContext);
+```
+
+### Accessibility (a11y) (HIGH)
+
+#### a11y-semantic-html-landmarks - @rules/a11y-semantic-html-landmarks.md
+
+Use semantic HTML elements for page structure.
+
+```tsx
+// Bad: divs with class names
+<div className="header">...</div>
+<div className="nav">...</div>
+<div className="content">...</div>
+
+// Good: semantic elements
+<header>...</header>
+<nav aria-label={t("Primary")}>...</nav>
+<main>...</main>
+<footer>...</footer>
+```
+
+#### a11y-screen-reader-sr-only - @rules/a11y-screen-reader-sr-only.md
+
+Use sr-only class for visually hidden text.
+
+```tsx
+// Icon-only buttons need accessible labels
+<Button variant="icon" onPress={onClose}>
+  <XMarkIcon aria-hidden="true" />
+  <span className="sr-only">{t("Close")}</span>
+</Button>
+
+// Visually hidden section headings
+<section>
+  <h2 className="sr-only">{t("Search results")}</h2>
+  <SearchResultsList />
+</section>
+```
+
+#### a11y-aria-live-regions - @rules/a11y-aria-live-regions.md
+
+Announce dynamic content changes to screen readers.
+
+```tsx
+// Error messages - announced immediately
+{
+  error && (
+    <p role="alert" className="text-failure-600">
+      {error}
+    </p>
+  );
+}
+
+// Status updates - announced politely
+<div role="status" aria-live="polite">
+  {t("{{count}} results found", { count })}
+</div>;
+```
+
+#### a11y-keyboard-navigation - @rules/a11y-keyboard-navigation.md
+
+Use semantic elements for built-in keyboard support.
+
+```tsx
+// Bad: div with onClick not keyboard accessible
+<div onClick={handleClick}>Click me</div>
+
+// Good: button has Enter/Space support
+<button onClick={handleClick}>Click me</button>
+
+// Good: react-aria Button handles everything
+import { Button } from "react-aria-components";
+<Button onPress={handlePress}>Click me</Button>
+```
+
+#### a11y-focus-management - @rules/a11y-focus-management.md
+
+Show visible focus indicators and trap focus in modals.
+
+```tsx
+// react-aria Modal handles focus trapping automatically
+import { Dialog, Modal } from "react-aria-components";
+
+// Always use focus-visible for focus styles
+<button className="focus-visible:ring-2 focus-visible:ring-teal-600">
+  Click me
+</button>;
+
+<Modal isOpen={isOpen}>
+  <Dialog>{/* Focus automatically trapped here */}</Dialog>
+</Modal>;
+```
+
+#### a11y-reduced-motion - @rules/a11y-reduced-motion.md
+
+Respect prefers-reduced-motion setting.
+
+```tsx
+import { usePrefersReducedMotion } from "~/hooks/use-prefers-reduced-motion";
+
+// CSS approach
+<div className="animate-bounce motion-reduce:animate-none">
+  Bouncing content
+</div>;
+
+// JS approach
+function AnimatedCounter({ value }) {
+  let prefersReducedMotion = usePrefersReducedMotion();
+  if (prefersReducedMotion) return <span>{value}</span>;
+  return <CountUp target={value} />;
+}
+```
+
+#### a11y-touch-targets - @rules/a11y-touch-targets.md
+
+Ensure 44x44px minimum touch targets.
+
+```tsx
+// Icon buttons need explicit sizing
+<Button variant="icon" className="h-11 w-11">
+  <XMarkIcon className="h-5 w-5" />
+  <span className="sr-only">{t("Close")}</span>
+</Button>
+
+// Links need padding for tappable area
+<Link to={href} className="block py-3 px-4">
+  {label}
+</Link>
 ```

@@ -6,218 +6,141 @@ tags: [routes, organization, file-structure]
 
 # Route Organization
 
-Use folder routes with colocated files for complex routes.
+Use `react-router-auto-routes` for file-system routing, enabling flexible organization with folder-based or flat routes and colocated files.
 
 ## Why
 
-- Keeps related code together
-- Easier to navigate large codebases
-- Clear separation of concerns
-- Server-only code stays separate
+- **Flexible Organization**: Mix and match folders and flat files.
+- **Colocation**: Keep components and utilities next to routes using `+` prefix.
+- **Scalable**: Supports monorepos and sub-apps.
+- **Clean**: No need for complex manual route configuration.
 
 ## File Structure
 
+`react-router-auto-routes` allows both folder-based and dot-delimited (flat) structures.
+
 ```
 routes/
-  # Simple routes - single file
-  login.tsx
-  logout.tsx
+  # Index route
+  index.tsx                 # /
 
-  # Complex routes - folder with colocated files
-  _.my-feature/
-    route.tsx            # Loader, action, default export
-    schemas.server.ts    # Zod schemas for validation
-    queries.server.ts    # Data fetching functions
-    actions.server.ts    # Action handlers (optional)
-    components/          # Route-specific components
-      header.tsx
-      item-card.tsx
-    assets/              # Route-specific assets
-      banner.png
+  # Simple route
+  about.tsx                 # /about
 
-  # Layout routes
-  _._app/
-    route.tsx            # Layout with Outlet
-    components/
+  # Folder-based route
+  settings/
+    index.tsx               # /settings
+    profile.tsx             # /settings/profile
+
+  # Dot-delimited (flat) route
+  auth.login.tsx            # /auth/login
+  auth.register.tsx         # /auth/register
+
+  # Pathless layout (folder)
+  _auth/
+    _layout.tsx             # Layout for /login, /register
+    login.tsx               # /login
+
+  # Dynamic parameters
+  users/
+    $id.tsx                 # /users/:id
+
+  # Resource route
+  api/
+    users.ts                # /api/users
+```
+
+## Colocation
+
+Colocate non-route files (components, utils, tests) directly in your route directories using the `+` prefix. These files are ignored by the router.
+
+**Convention**: Use `+<ParentName>` (e.g. `+dashboard`) instead of generic `+` folders. This makes imports easier to identify at a glance (e.g. `import ... from "./+dashboard/utils"`) and avoids confusion from having multiple `+` folders in your codebase.
+
+```
+routes/
+  dashboard/
+    _layout.tsx             # Dashboard layout
+    index.tsx               # /dashboard
+    analytics.tsx           # /dashboard/analytics
+
+    # Shared code for dashboard routes
+    +dashboard/
       sidebar.tsx
+      queries.server.ts
+      types.ts
 
-  # Nested routes under layout
-  _._app.dashboard/
-    route.tsx
-    queries.server.ts
-    components/
-      header.tsx
-      activity-feed.tsx
+  users/
+    $id/
+      index.tsx             # /users/:id
+
+      # Route-specific colocation
+      +user-id/             # Shared scope for this route
+        queries.server.ts
+        user-card.tsx
 ```
 
 ## Naming Conventions
 
-| Pattern                     | Meaning                | URL                      |
-| --------------------------- | ---------------------- | ------------------------ |
-| `_.projects/route.tsx`      | Nested under \_ layout | `/projects`              |
-| `_._profile/route.tsx`      | Layout route           | (no URL)                 |
-| `_._profile.home/route.tsx` | Child of layout        | `/home`                  |
-| `_.projects_.$projectId/`   | Dynamic segment        | `/projects/:projectId`   |
-| `api.search.items.tsx`      | Resource route (no UI) | `/api/search/items`      |
+| Pattern           | Meaning               | URL                 |
+| ----------------- | --------------------- | ------------------- |
+| `index.tsx`       | Index route           | `/` parent path     |
+| `_layout.tsx`     | Layout component      | Wraps child routes  |
+| `about.tsx`       | Named route           | `/about`            |
+| `_auth/`          | Pathless layout group | (no URL segment)    |
+| `$id.tsx`         | Dynamic segment       | `/:id`              |
+| `($lang).tsx`     | Optional segment      | `/:lang?`           |
+| `$.tsx`           | Splat (catch-all)     | `/*`                |
+| `robots[.]txt.ts` | Escaped character     | `/robots.txt`       |
+| `+queries.ts`     | Colocated file        | (ignored by router) |
+| `+dashboard/`     | Colocated folder      | (ignored by router) |
 
-## File Naming
-
-```
-route.tsx           # Required - loader, action, component
-queries.server.ts   # Data fetching (server-only)
-actions.server.ts   # Mutation handlers (server-only)
-schemas.server.ts   # Zod schemas for params, search, form data
-*.server.ts         # Any server-only code
-components/         # Route-specific components
-hooks/              # Route-specific hooks
-assets/             # Images, etc.
-```
-
-## Example: Complex Route
+## Example: Complex Feature
 
 ```
-routes/_.items_.$itemId_.edit/
-  route.tsx
-  schemas.server.ts
-  queries.server.ts
-  actions.server.ts
-  components/
-    toolbar.tsx
-    image-gallery.tsx
+routes/
+  projects/
+    _layout.tsx               # Layout: /projects
+    index.tsx                 # Page:   /projects
+
+    # Nested dynamic route
+    $projectId/
+      _layout.tsx             # Layout: /projects/:projectId
+      index.tsx               # Page:   /projects/:projectId
+      settings.tsx            # Page:   /projects/:projectId/settings
+
+      # Shared files for $projectId routes
+      +project-id/
+        queries.server.ts
+        project-nav.tsx
+
+      # Specific to settings page (could also be in settings.tsx)
+      +settings/
+        form-schema.ts
 ```
 
-### route.tsx
+### Example Code
+
+**`routes/projects/$projectId/index.tsx`**
 
 ```tsx
-import { data } from "react-router";
-import { queryItem, queryToolbar } from "./queries.server";
-import { Toolbar } from "./components/toolbar";
-import { ImageGallery } from "./components/image-gallery";
-import { currentUser } from "~/lib/authorize.server";
+import type { Route } from "./+types/index";
+// generated types if using them
+import { useLoaderData } from "react-router";
+import { ProjectNav } from "./+project-id/project-nav";
+import { getProject } from "./+project-id/queries.server";
 
-export async function loader({ request, params }: Route.LoaderArgs) {
-  let user = currentUser();
-  let itemId = z.string().parse(params.itemId);
-
-  let [item, toolbar] = await Promise.all([
-    queryItem(user.id, itemId),
-    queryToolbar(user.id, itemId),
-  ]);
-
-  return data({ item, toolbar });
+export async function loader({ params }: Route.LoaderArgs) {
+  const project = await getProject(params.projectId);
+  return { project };
 }
 
-export async function action({ request, params }: Route.ActionArgs) {
-  // ... uses actions.server.ts
-}
-
-export default function Component() {
-  const { item, toolbar } = useLoaderData<typeof loader>();
-
+export default function ProjectRoute({ loaderData }: Route.ComponentProps) {
+  const { project } = loaderData;
   return (
     <div>
-      <Toolbar {...toolbar} />
-      <ImageGallery images={item.images} />
-      {/* ... */}
+      <ProjectNav project={project} />
+      <h1>{project.name}</h1>
     </div>
   );
-}
-```
-
-### schemas.server.ts
-
-Keep all Zod schemas for the route in one place. Use factory functions that receive `TFunction` for translatable error messages:
-
-```tsx
-import type { TFunction } from "i18next";
-import { z } from "zod";
-
-// URL params validation (no i18n needed - internal errors)
-export const paramsSchema = z.object({
-  itemId: z.string(),
-});
-
-// Search params validation (no i18n needed - internal errors)
-export const searchParamsSchema = z.object({
-  page: z.coerce.number().optional().default(1),
-  sort: z.enum(["newest", "oldest"]).optional().default("newest"),
-  query: z.string().nullish(),
-});
-
-// Form data validation - factory function for i18n error messages
-export function actionSchema(t: TFunction) {
-  return z.discriminatedUnion("intent", [
-    z.object({
-      intent: z.literal("update"),
-      title: z.string().min(1, t("Title is required")),
-      amount: z.coerce
-        .number({ message: t("Amount must be a number") })
-        .positive(t("Amount must be positive"))
-        .max(10000, t("Amount cannot exceed {{max}}", { max: 10000 })),
-      description: z.string().optional(),
-    }),
-    z.object({
-      intent: z.literal("delete"),
-    }),
-  ]);
-}
-```
-
-### queries.server.ts
-
-```tsx
-export async function queryItem(userId: string, itemId: string) {
-  let item = await fetchItem(userId, itemId);
-  return {
-    id: item.id,
-    title: item.title,
-    images: item.images,
-  };
-}
-```
-
-### route.tsx using schemas
-
-```tsx
-import {
-  paramsSchema,
-  searchParamsSchema,
-  actionSchema,
-} from "./schemas.server";
-import { queryItem } from "./queries.server";
-import { getInstance } from "~/middleware/i18next";
-import { currentUser } from "~/lib/authorize.server";
-
-export async function loader({ request, params }: Route.LoaderArgs) {
-  let user = currentUser();
-  let { itemId } = paramsSchema.parse(params);
-
-  let url = new URL(request.url);
-  let { page, sort } = searchParamsSchema.parse(
-    Object.fromEntries(url.searchParams),
-  );
-
-  let item = await queryItem(user, itemId);
-  return data({ item, page, sort });
-}
-
-export async function action({ request, params }: Route.ActionArgs) {
-  let user = currentUser();
-  let t = getInstance(context).t;
-  let { itemId } = paramsSchema.parse(params);
-  let formData = await request.formData();
-
-  // Pass t to schema factory for translated error messages
-  let body = actionSchema(t).parse(Object.fromEntries(formData.entries()));
-
-  if (body.intent === "update") {
-    await updateItem(user, itemId, body);
-    throw redirect(`/items/${itemId}`);
-  }
-
-  if (body.intent === "delete") {
-    await deleteItem(user, itemId);
-    throw redirect("/items");
-  }
 }
 ```

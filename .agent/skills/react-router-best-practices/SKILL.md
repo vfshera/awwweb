@@ -5,7 +5,7 @@ description: React Router performance and architecture patterns. Use when writin
 
 # React Router Best Practices
 
-Performance optimization and architecture patterns for React Router applications. Contains 55 rules across 11 categories focused on data loading, actions, forms, streaming, and route organization.
+Performance optimization and architecture patterns for React Router applications. Contains 66 rules across 14 categories focused on internationalization, data loading, actions, forms, streaming, and route organization.
 
 ## When to Apply
 
@@ -16,9 +16,120 @@ Reference these guidelines when:
 - Implementing streaming with Single Fetch
 - Organizing route files and colocating queries
 - Setting up authentication patterns
+- Adding internationalization with `remix-i18next`
 - Adding SEO/meta tags
 
 ## Rules Summary
+
+### Internationalization (CRITICAL)
+
+#### i18n-setup-middleware - @rules/i18n-setup-middleware.md
+
+Configure `createI18nextMiddleware` and type-safe resources.
+
+```ts
+export const [i18nextMiddleware, getLocale, getInstance] =
+  createI18nextMiddleware({
+    detection: {
+      supportedLanguages: ["es", "en"],
+      fallbackLanguage: "en",
+      cookie: localeCookie,
+    },
+    i18next: { resources },
+    plugins: [initReactI18next],
+  });
+```
+
+#### i18n-locales-structure - @rules/i18n-locales-structure.md
+
+Define locale resources per language and re-export.
+
+```ts
+// app/locales/en/translation.ts
+export default { title: "Example" };
+```
+
+#### i18n-namespaces-strategy - @rules/i18n-namespaces-strategy.md
+
+Use a single namespace for small apps; multiple namespaces for large apps.
+
+```ts
+// Large app: common + route namespaces
+export default { common, home, notFound };
+```
+
+#### i18n-locale-detection - @rules/i18n-locale-detection.md
+
+Prefer cookie/session for speed, with DB as source of truth.
+
+```ts
+export const [i18nextMiddleware, getLocale] = createI18nextMiddleware({
+  detection: { cookie: localeCookie, fallbackLanguage: "en" },
+});
+```
+
+#### i18n-language-switcher - @rules/i18n-language-switcher.md
+
+Store locale in cookie/session and keep it in sync.
+
+```ts
+return data(
+  { locale },
+  { headers: { "Set-Cookie": await localeCookie.serialize(locale) } },
+);
+```
+
+#### i18n-root-locale-sync - @rules/i18n-root-locale-sync.md
+
+Send locale to the UI and sync `<html lang dir>`.
+
+```tsx
+export async function loader({ context }: Route.LoaderArgs) {
+  let locale = getLocale(context);
+  return data(
+    { locale },
+    { headers: { "Set-Cookie": await localeCookie.serialize(locale) } },
+  );
+}
+```
+
+#### i18n-entry-client-init - @rules/i18n-entry-client-init.md
+
+Initialize i18next client with `htmlTag` detection.
+
+```ts
+i18next.init({ detection: { order: ["htmlTag"], caches: [] } });
+```
+
+#### i18n-entry-server-provider - @rules/i18n-entry-server-provider.md
+
+Reuse the middleware instance in SSR with `I18nextProvider`.
+
+```tsx
+<I18nextProvider i18n={getInstance(routerContext)}>
+  <ServerRouter context={entryContext} url={request.url} />
+</I18nextProvider>
+```
+
+#### i18n-locales-resource-route - @rules/i18n-locales-resource-route.md
+
+Serve `/api/locales/:lng/:ns` with validation and cache headers.
+
+```ts
+return data(namespaces[ns.data], { headers });
+```
+
+#### i18n-use-bound-t-in-loader - @rules/i18n-use-bound-t-in-loader.md
+
+Use the bound `t()` in loaders and `useTranslation` in components.
+
+```ts
+let t = getInstance(context).getFixedT(locale);
+```
+
+#### i18n-not-found-i18n - @rules/i18n-not-found-i18n.md
+
+Provide a 404 route so middleware runs and translations load.
 
 ### Data Loading (CRITICAL)
 
